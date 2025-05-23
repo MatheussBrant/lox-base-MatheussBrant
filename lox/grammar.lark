@@ -11,7 +11,10 @@ program    : stmt*
 print_cmd  : "print" expr ";"
 
 // EXPRESSÕES
-?expr      : logic_or
+?expr      : assignment
+
+?assignment: VAR "=" assignment   -> assign
+           | logic_or
 
 ?logic_or  : logic_or "or" logic_and   -> or_
            | logic_and
@@ -24,7 +27,7 @@ print_cmd  : "print" expr ";"
            | cmp
 
 ?cmp       : cmp ">" factor   -> gt
-           | cmp "<" factor   -> lt
+           | cmp "<" factor  -> lt
            | cmp ">=" factor  -> ge
            | cmp "<=" factor  -> le
            | factor

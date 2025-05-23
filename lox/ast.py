@@ -254,7 +254,14 @@ class Assign(Expr):
 
     Ex.: x = 42
     """
+    name: str
+    value: Expr
 
+    def eval(self, ctx: Ctx) -> Value:
+        # Avalia o lado direito e armazena no contexto
+        val = self.value.eval(ctx)
+        ctx[self.name] = val
+        return val
 
 @dataclass
 class Getattr(Expr):

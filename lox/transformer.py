@@ -64,6 +64,10 @@ class LoxTransformer(Transformer):
             return Call(UnaryOp(op.neg, right.callee), right.params)
         return UnaryOp(op.neg, right)
 
+    # Atribuição
+    def assign(self, name: Var, expr: Expr):
+        return Assign(name.name, expr)
+
     # Acesso a atributo
     def getattr(self, obj: Expr, attr: Var):
         return Getattr(obj, attr.name)
