@@ -68,6 +68,10 @@ class LoxTransformer(Transformer):
     def assign(self, name: Var, expr: Expr):
         return Assign(name.name, expr)
 
+    # Atribuição de atributo
+    def setattr(self, obj: Expr, attr: Var, value: Expr):
+        return Setattr(obj, attr.name, value)
+
     # Acesso a atributo
     def getattr(self, obj: Expr, attr: Var):
         return Getattr(obj, attr.name)

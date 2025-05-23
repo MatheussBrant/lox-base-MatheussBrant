@@ -289,6 +289,15 @@ class Setattr(Expr):
 
     Ex.: x.y = 42
     """
+    obj: Expr
+    name: str
+    value: Expr
+
+    def eval(self, ctx: Ctx) -> Value:
+        target = self.obj.eval(ctx)
+        val = self.value.eval(ctx)
+        setattr(target, self.name, val)
+        return val
 
 
 #

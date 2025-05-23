@@ -13,39 +13,40 @@ print_cmd  : "print" expr ";"
 // EXPRESSÕES
 ?expr      : assignment
 
-?assignment: VAR "=" assignment   -> assign
+?assignment: atom "." VAR "=" assignment   -> setattr
+           | VAR "=" assignment            -> assign
            | logic_or
 
-?logic_or  : logic_or "or" logic_and   -> or_
-           | logic_and
+?logic_or  : logic_and
+           | logic_or "or" logic_and       -> or_
 
-?logic_and : logic_and "and" test       -> and_
-           | test
+?logic_and : equality
+           | logic_and "and" equality      -> and_
 
-?test      : test "==" cmp  -> eq
-           | test "!=" cmp  -> ne
-           | cmp
+?equality  : comparison
+           | equality "==" comparison      -> eq
+           | equality "!=" comparison      -> ne
 
-?cmp       : cmp ">" factor   -> gt
-           | cmp "<" factor  -> lt
-           | cmp ">=" factor  -> ge
-           | cmp "<=" factor  -> le
-           | factor
+?comparison: term
+           | comparison ">" term           -> gt
+           | comparison "<" term           -> lt
+           | comparison ">=" term          -> ge
+           | comparison "<=" term          -> le
 
-?factor    : factor "+" term  -> add
-           | factor "-" term  -> sub
-           | term
+?term      : factor
+           | term "+" factor               -> add
+           | term "-" factor               -> sub
 
-?term      : term "*" unary   -> mul
-           | term "/" unary   -> div 
-           | unary
+?factor    : unary
+           | factor "*" unary              -> mul
+           | factor "/" unary              -> div
 
-?unary     : "!" unary        -> not_
-           | "-" unary        -> neg
+?unary     : "!" unary                     -> not_
+           | "-" unary                     -> neg
            | atom
 
-?atom      : atom "(" params ")"   -> call      
-           | atom "." VAR          -> getattr
+?atom      : atom "(" params ")"           -> call
+           | atom "." VAR                  -> getattr
            | NUMBER 
            | BOOL
            | VAR
@@ -53,7 +54,6 @@ print_cmd  : "print" expr ";"
            | NIL
            | "(" expr ")"
 
-// call       : VAR "(" params ")"   
 params     : [ expr ("," expr )* ]
 
 BOOL.2     : "true" | "false"
