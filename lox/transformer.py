@@ -47,15 +47,14 @@ class LoxTransformer(Transformer):
     eq = op_handler(op.eq)
     ne = op_handler(op.ne)
 
-    # Acesso a atributo (novidade)
+    # Acesso a atributo
     def getattr(self, obj: Expr, attr: Var):
         # attr é um token VAR já convertido no método VAR abaixo
         return Getattr(obj, attr.name)
 
-    # Outras expressões
-    def call(self, name: Var, params: list):
-        return Call(name.name, params)
-        
+    def call(self, callee: Expr, params: list):
+        return Call(callee, params)
+
     def params(self, *args):
         return list(args)
 
@@ -68,10 +67,10 @@ class LoxTransformer(Transformer):
 
     def NUMBER(self, token):
         return Literal(float(token))
-    
+
     def STRING(self, token):
         return Literal(str(token)[1:-1])
-    
+
     def NIL(self, _):
         return Literal(None)
 

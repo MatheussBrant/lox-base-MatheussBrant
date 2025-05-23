@@ -31,8 +31,8 @@ print_cmd  : "print" expr ";"
            | term "/" atom   -> div 
            | atom
 
-?atom      : atom "." VAR        -> getattr
-           | call
+?atom      : atom "(" params ")"   -> call      
+           | atom "." VAR          -> getattr
            | NUMBER 
            | BOOL
            | VAR
@@ -40,12 +40,12 @@ print_cmd  : "print" expr ";"
            | NIL
            | "(" cmp ")"
 
-call       : VAR "(" params ")"
+// call       : VAR "(" params ")"   
 params     : [ expr ("," expr )* ]
 
 BOOL.2     : "true" | "false"
 VAR.1      : /[a-z_]\w*/
-NUMBER     : /([1-9][0-9]*|0)(\.[0-9]+)?/ 
+NUMBER     : /([1-9][0-9]*|0)(\.[0-9]+)?/
 STRING     : /"[^"]*"/
 NIL.2      : "nil"
 COMMENT    : "//" /[^\n]*/

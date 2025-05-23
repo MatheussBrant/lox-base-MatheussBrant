@@ -139,20 +139,18 @@ class Call(Expr):
     """
     Uma chamada de função.
 
-    Ex.: fat(42)
+    Ex.: fat(42)  ou  obj.method()(arg)
     """
-    name: str
+    callee: Expr
     params: list[Expr]
-    
+
     def eval(self, ctx: Ctx):
-        func = ctx[self.name]
-        params = []
-        for param in self.params:
-            params.append(param.eval(ctx))
-        
-        if callable(func):
-            return func(*params)
-        raise TypeError(f"{self.name} não é uma função!")
+        fn = self.callee.eval(ctx)
+        args = [arg.eval(ctx) for arg in self.params]
+
+        if callable(fn):
+            return fn(*args)
+        raise TypeError("tentativa de chamar valor não-função!")
 
 
 @dataclass
@@ -221,7 +219,7 @@ class Print(Stmt):
     Ex.: print "Hello, world!";
     """
     expr: Expr
-    
+
     def eval(self, ctx: Ctx):
         value = self.expr.eval(ctx)
         print(value)
