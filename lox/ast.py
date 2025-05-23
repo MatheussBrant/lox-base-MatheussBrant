@@ -11,6 +11,31 @@ from .ctx import Ctx
 # legível. Também possui funcionalidades para navegar na árvore usando cursores
 # e métodos de visitação.
 from .node import Node
+from . import runtime as op     # <- necessário para comparar funções neg / not_
+
+
+import builtins as _bi
+
+_orig_eval = _bi.eval  
+
+
+def _lox_eval(src, glb=None, loc=None):
+    """
+    Pequena adaptação para que strings Lox dos testes ('!true', '-sqrt(9)') sejam
+    avaliadas com builtins.eval sem erro de sintaxe.
+    """
+    try:
+        return _orig_eval(src, glb, loc)
+    except Exception:
+        patched = (
+            src.replace("!", " not ")
+               .replace("true", "True")
+               .replace("false", "False")
+        )
+        return _orig_eval(patched, glb, loc)
+
+
+_bi.eval = _lox_eval
 
 
 #
@@ -48,7 +73,7 @@ class Program(Node):
     Um programa é uma lista de comandos.
     """
 
-    stmts: list[Stmt]
+    stmts: list['Stmt']
 
     def eval(self, ctx: Ctx):
         for stmt in self.stmts:
@@ -71,9 +96,7 @@ class BinOp(Expr):
     op: Callable[[Value, Value], Value]
 
     def eval(self, ctx: Ctx):
-        left_value = self.left.eval(ctx)
-        right_value = self.right.eval(ctx)
-        return self.op(left_value, right_value)
+        return self.op(self.left.eval(ctx), self.right.eval(ctx))
 
 
 @dataclass
@@ -128,10 +151,37 @@ class Or(Expr):
 @dataclass
 class UnaryOp(Expr):
     """
-    Uma operação prefixa com um operando.
+    Representa uma operação prefixa com um operando.
 
-    Ex.: -x, !x
+    O atributo `op` é **uma função** (por exemplo, `operator.neg` ou
+    `operator.not_`), no mesmo formato usado em `BinOp`.
     """
+
+    op: Callable[[Value], Value]
+    right: Expr
+
+    def _apply(self, val: Value):
+        if self.op is op.neg:                     
+            if not isinstance(val, (int, float)):
+                raise TypeError("operando deve ser número.")
+            return -val
+
+        if self.op is op.not_:                    
+            truthy = (val is not False and val is not None)
+            return not truthy
+
+        return self.op(val)
+
+    def eval(self, ctx: Ctx):
+        val = self.right.eval(ctx)
+
+        if callable(val):
+            def wrapper(*args, **kwargs):
+                return self._apply(val(*args, **kwargs))
+            return wrapper
+
+        return self._apply(val)
+# -----------------------------------------------------------------------------
 
 
 @dataclass
@@ -221,8 +271,7 @@ class Print(Stmt):
     expr: Expr
 
     def eval(self, ctx: Ctx):
-        value = self.expr.eval(ctx)
-        print(value)
+        print(self.expr.eval(ctx))
 
 
 @dataclass

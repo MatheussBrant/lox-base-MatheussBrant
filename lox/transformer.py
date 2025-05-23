@@ -47,9 +47,18 @@ class LoxTransformer(Transformer):
     eq = op_handler(op.eq)
     ne = op_handler(op.ne)
 
+    def not_(self, right: Expr):
+        if isinstance(right, Call):
+            return Call(UnaryOp(op.not_, right.callee), right.params)
+        return UnaryOp(op.not_, right)
+
+    def neg(self, right: Expr):
+        if isinstance(right, Call):
+            return Call(UnaryOp(op.neg, right.callee), right.params)
+        return UnaryOp(op.neg, right)
+
     # Acesso a atributo
     def getattr(self, obj: Expr, attr: Var):
-        # attr é um token VAR já convertido no método VAR abaixo
         return Getattr(obj, attr.name)
 
     def call(self, callee: Expr, params: list):
