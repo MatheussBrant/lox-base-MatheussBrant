@@ -31,13 +31,14 @@ print_cmd  : "print" expr ";"
            | term "/" atom   -> div 
            | atom
 
-?atom      : NUMBER 
+?atom      : atom "." VAR        -> getattr
+           | call
+           | NUMBER 
            | BOOL
            | VAR
            | STRING
            | NIL
            | "(" cmp ")"
-           | call
 
 call       : VAR "(" params ")"
 params     : [ expr ("," expr )* ]

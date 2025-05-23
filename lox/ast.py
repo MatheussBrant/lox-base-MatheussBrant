@@ -182,13 +182,29 @@ class Assign(Expr):
     """
 
 
+# -----------------------------------------------------------------
+# ALTERAÇÃO: Getattr agora possui campos e implementação completos
+# -----------------------------------------------------------------
 @dataclass
 class Getattr(Expr):
     """
     Acesso a atributo de um objeto.
 
-    Ex.: x.y
+    Ex.: x.y ou obj.attr.subattr
     """
+
+    obj: Expr
+    attr: str
+
+    def eval(self, ctx: Ctx):
+        # Avalia o objeto primeiro
+        value = self.obj.eval(ctx)
+        # Usa getattr dinâmico do Python
+        try:
+            return getattr(value, self.attr)
+        except AttributeError:
+            raise AttributeError(f"objeto {value!r} não possui atributo {self.attr!r}")
+# -----------------------------------------------------------------
 
 
 @dataclass

@@ -47,29 +47,30 @@ class LoxTransformer(Transformer):
     eq = op_handler(op.eq)
     ne = op_handler(op.ne)
 
+    # Acesso a atributo (novidade)
+    def getattr(self, obj: Expr, attr: Var):
+        # attr é um token VAR já convertido no método VAR abaixo
+        return Getattr(obj, attr.name)
+
     # Outras expressões
     def call(self, name: Var, params: list):
         return Call(name.name, params)
         
     def params(self, *args):
-        params = list(args)
-        return params
+        return list(args)
 
     # Comandos
     def print_cmd(self, expr):
         return Print(expr)
 
     def VAR(self, token):
-        name = str(token)
-        return Var(name)
+        return Var(str(token))
 
     def NUMBER(self, token):
-        num = float(token)
-        return Literal(num)
+        return Literal(float(token))
     
     def STRING(self, token):
-        text = str(token)[1:-1]
-        return Literal(text)
+        return Literal(str(token)[1:-1])
     
     def NIL(self, _):
         return Literal(None)
