@@ -131,6 +131,13 @@ class Literal(Expr):
         return self.value
 
 
+def is_truthy(val: Value) -> bool:
+    """
+    Em Lox, nil (None) e False são falsey; todo o resto é truthy.
+    """
+    return False if val is False or val is None else True
+
+
 @dataclass
 class And(Expr):
     """
@@ -139,6 +146,16 @@ class And(Expr):
     Ex.: x and y
     """
 
+    left: Expr
+    right: Expr
+
+    def eval(self, ctx: Ctx) -> Value:
+        left_val = self.left.eval(ctx)
+        # curto-circuito: se o esquerdo for falsey, retorna sem avaliar o direito
+        if not is_truthy(left_val):
+            return left_val
+        return self.right.eval(ctx)
+
 
 @dataclass
 class Or(Expr):
@@ -146,6 +163,16 @@ class Or(Expr):
     Uma operação infixa com dois operandos.
     Ex.: x or y
     """
+
+    left: Expr
+    right: Expr
+
+    def eval(self, ctx: Ctx) -> Value:
+        left_val = self.left.eval(ctx)
+        # curto-circuito: se o esquerdo for truthy, retorna sem avaliar o direito
+        if is_truthy(left_val):
+            return left_val
+        return self.right.eval(ctx)
 
 
 @dataclass
@@ -181,7 +208,6 @@ class UnaryOp(Expr):
             return wrapper
 
         return self._apply(val)
-# -----------------------------------------------------------------------------
 
 
 @dataclass
@@ -206,7 +232,7 @@ class Call(Expr):
 @dataclass
 class This(Expr):
     """
-    Acesso ao `this`.
+    Acesso ao this.
 
     Ex.: this
     """
@@ -326,6 +352,7 @@ class Block(Node):
 
     Ex.: { var x = 42; print x;  }
     """
+    stmts: list[Stmt]
 
 
 @dataclass

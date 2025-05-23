@@ -11,7 +11,13 @@ program    : stmt*
 print_cmd  : "print" expr ";"
 
 // EXPRESSÕES
-?expr      : test
+?expr      : logic_or
+
+?logic_or  : logic_or "or" logic_and   -> or_
+           | logic_and
+
+?logic_and : logic_and "and" test       -> and_
+           | test
 
 ?test      : test "==" cmp  -> eq
            | test "!=" cmp  -> ne
@@ -42,7 +48,7 @@ print_cmd  : "print" expr ";"
            | VAR
            | STRING
            | NIL
-           | "(" cmp ")"
+           | "(" expr ")"
 
 // call       : VAR "(" params ")"   
 params     : [ expr ("," expr )* ]

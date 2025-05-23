@@ -47,6 +47,13 @@ class LoxTransformer(Transformer):
     eq = op_handler(op.eq)
     ne = op_handler(op.ne)
 
+    # Operadores lógicos
+    def or_(self, left: Expr, right: Expr):
+        return Or(left, right)
+
+    def and_(self, left: Expr, right: Expr):
+        return And(left, right)
+
     def not_(self, right: Expr):
         if isinstance(right, Call):
             return Call(UnaryOp(op.not_, right.callee), right.params)
